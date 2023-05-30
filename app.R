@@ -3,6 +3,14 @@ source("header.R")
 source("pages.R")
 source("footer.R")
 
+# Function to fetch genres from the database
+getGenres <- function() {
+  query <- "SELECT DISTINCT genres FROM movies"
+  genres <- dbGetQuery(con, query)$genres
+  unique(unlist(strsplit(genres, ", ")))
+}
+
+
 # user interface and rounting
 ui <- fluidPage(
   pageTitles, css, header,
