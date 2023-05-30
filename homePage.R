@@ -2,7 +2,7 @@
 homePageUi <-sidebarLayout(
     sidebarPanel(
       # Input fields for filters
-      selectInput("genre", "Genre", choices = c("All", getGenres())),
+      selectInput("genre", "Genre", choices = c("All", "")),
       actionButton("filter_btn", "Apply Filters")
     ),
     mainPanel(
