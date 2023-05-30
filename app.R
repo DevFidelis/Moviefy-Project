@@ -62,7 +62,7 @@ server <- function(input, output, session) {
       
       table_view$title <- NA
       #iterating throught the dataset to get movie titles
-      for(index in 1:10325){
+      for(index in 1:9000){
         table_view[index, 3] <- as.character(subset(data2,
                                                     data2$movieId == table_view[index, 1])$title)
       }
