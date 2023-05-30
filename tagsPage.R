@@ -1,0 +1,1 @@
+tagsPageUi <- tags$h2("Tags Page") # define the tags page interface here

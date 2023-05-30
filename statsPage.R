@@ -1,0 +1,1 @@
+statsPageUi <- tags$h2("Stats Page") # define the tags page interface here

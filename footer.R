@@ -1,0 +1,1 @@
+footer <- tags$script(src = "welcome.js")
