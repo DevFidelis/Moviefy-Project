@@ -3,6 +3,12 @@ library(shiny)
 library(shiny.router)
 library(DBI)
 library(RMySQL)
+library(shinydashboard)
+library(ggplot2)
+library(recommenderlab)
+library(data.table)
+library(ggplot2)
+library(reshape2)
 
 # Meta Data
 pageTitles <- titlePanel(title = "", windowTitle = "Moviefy - The home of movie recommendations")
