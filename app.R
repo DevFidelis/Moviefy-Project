@@ -25,6 +25,24 @@ server <- function(input, output, session) {
     port = 3306,
     user = "u8ulpjyfa8ywgjut",
     password = "5dHXIT7aWAJ641MnIWq0")
+
+
+  # Query to get movies based on filters
+  getFilteredMovies <- function(genre) {
+    query <- "SELECT DISTINCT title, genres FROM movies"
+    if (genre != "All") {
+      query <- paste0(query, " WHERE FIND_IN_SET('", genre, "', genres)")
+    }
+    dbGetQuery(con, query)
+  }
+  
+  # Update the displayed movies table based on filters
+  observeEvent(input$filter_btn, {
+    movies <- getFilteredMovies(input$genre)
+    output$movies_table <- renderTable({
+      movies
+    })
+  })
     
     # close database connection  
     dbDisconnect(con)
