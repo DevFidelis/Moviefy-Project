@@ -71,28 +71,60 @@ server <- function(input, output, session) {
 
   data2 <- dbGetQuery(con, query2)
   data1 <-    dbGetQuery(con, query1)    
-
-  # stats
-  output$data_preview <- renderTable({
-    head(data1)
-  })
-
-  output$data_preview2 <- renderTable({
-    head(data2)
-  })
-
+  
+  # Summary of the ratings
   output$summary_stats <- renderPrint({
     summary(data1)
+  })
+  # Summary of the ratings
+  output$movie_summary <- renderPrint(
+    summary(data2)
+  )  
+  #Average rating
+  output$averageRating <- renderPlot({
+    ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
+    ratingMatrix <- as.matrix(ratingMatrix[,-1])
+    
+    ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
+    movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
+    #movie_rating
+    
+    minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
+    minimum_users <- quantile(colCounts(movie_rating), 0.98)
+    
+    #average_rating <- rowMeans(movie_rating)
+    #qplot(average_rating, fill=I('steelblue'), col=I("red"))+
+     # ggtitle("distribution of the average rating per user")
+  normalized_rating <- normalize(movie_rating)
+  sum(rowMeans(normalized_rating) > 0.00001)
+  
+  image(normalized_rating[rowCounts(normalized_rating) > minimum_movies,
+                          colCounts(normalized_rating) > minimum_users],
+        main = "Normalized rating of top Users")
+
   })
 
   output$histogram <- renderPlot({
     ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
     ratingMatrix <- as.matrix(ratingMatrix[,-1])
     ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
-    similarity_matrix <- similarity(ratingMatrix[1:4, ], method = "cosine", which= "user")
-    image(as.matrix(similarity_matrix), main = "Users Similarity") 
+    movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
+    
+    minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
+    minimum_users <- quantile(colCounts(movie_rating), 0.98)
+     
+    normalized_rating <- normalize(movie_rating)
+    sum(rowMeans(normalized_rating) > 0.00001)
+    average_rating <- rowMeans(movie_rating)
+    qplot(average_rating, fill=I('steelblue'), col=I("red"))+
+     ggtitle("distribution of the average rating per user")
+    
+    #image(normalized_rating[rowCounts(normalized_rating) > minimum_movies,
+     #                       colCounts(normalized_rating) > minimum_users],
+     #     main = "Normalized rating of top Users")
+    
   })
-
+#most watched movie
   output$most_rated <- renderPlot({
     ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
     ratingMatrix <- as.matrix(ratingMatrix[,-1])
@@ -102,24 +134,36 @@ server <- function(input, output, session) {
     table_view <- table_view[order(table_view$views, decreasing = TRUE), ]
     
     table_view$title <- NA
-    #iterating throught the dataset to get movie titles
     for(index in 1:9000){
       table_view[index, 3] <- as.character(subset(data2,
                                                   data2$movieId == table_view[index, 1])$title)
     }
-    
-    #showing it in form of a histogram
-    #table_view[1:6,]
     ggplot(table_view[1:6,], aes(x = title, y = views)) +
       geom_bar(stat = "identity", fill = 'steelblue') +
       geom_text(aes(label=views), vjust=-0.3, size=3.5) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       ggtitle("total views of films")
   })
+  
+  output$average <- renderPlot({
+    ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
+    ratingMatrix <- as.matrix(ratingMatrix[,-1])
+    ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
+    movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
+    
+    minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
+    minimum_users <- quantile(colCounts(movie_rating), 0.98)
+    
+    normalized_rating <- normalize(movie_rating)
+    sum(rowMeans(normalized_rating) > 0.00001)
+  
+    image(normalized_rating[rowCounts(normalized_rating) > minimum_movies,
+                           colCounts(normalized_rating) > minimum_users],
+         main = "Normalized rating of top Users")
+    
+  })
 
-  output$movie_summary <- renderPrint(
-    summary(data2)
-  )  
+
 
   # Clean up: Disconnect from the database when the app is closed
   onStop(function() {

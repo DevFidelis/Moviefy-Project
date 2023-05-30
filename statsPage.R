@@ -1,18 +1,10 @@
 statsPageUi <- tags$div(
-  
-  dashboardHeader(title = "CSV Analyzer"),
   dashboardSidebar("Stats"),
   dashboardBody(
     fluidRow(
       box(
-        title = "Rating Preview",
-        tableOutput("data_preview")
-      )
-    ),
-    fluidRow(
-      box(
-        title = "Movie Preview",
-        tableOutput("data_preview2")
+        title = "Average rating",
+        verbatimTextOutput("average1")
       )
     ),
     fluidRow(
@@ -26,14 +18,25 @@ statsPageUi <- tags$div(
           verbatimTextOutput("movie_summary")
         )
       ),
-      box(
-        title = "Most Rated",
-        plotOutput("most_rated")
+      fluidRow(
+        box(
+          title = "Average rating",
+          plotOutput("average")
+        )
       ),
-      box(
-        title = "Histogram",
-        plotOutput("histogram")
+      fluidRow(
+        box(
+          title = "Most Viewed",
+          plotOutput("most_rated")
+        )
+      ),
+      fluidRow(
+        box(
+          title = "Avarage Rating",
+          plotOutput("histogram")
+        )
       )
+    
     )
   )
 )
