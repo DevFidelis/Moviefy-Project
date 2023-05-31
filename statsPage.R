@@ -3,25 +3,25 @@ statsPageUi <- tags$div(
   dashboardBody(
     fluidRow(
       box(
-        title = "Average rating",
-        verbatimTextOutput("average1")
-      )
-    ),
-    fluidRow(
-      box(
         title = "Rating Statistics",
         verbatimTextOutput("summary_stats")
       ),
       fluidRow(
         box(
-          title = "Movie Stats",
+          title = "Movie Statistics",
           verbatimTextOutput("movie_summary")
         )
       ),
       fluidRow(
         box(
-          title = "Average rating",
+          title = "Normalized Heatmap",
           plotOutput("average")
+        )
+      ),
+      fluidRow(
+        box(
+          title = "Heatmap",
+          plotOutput("average2")
         )
       ),
       fluidRow(
@@ -30,6 +30,7 @@ statsPageUi <- tags$div(
           plotOutput("most_rated")
         )
       ),
+    
       fluidRow(
         box(
           title = "Avarage Rating",

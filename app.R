@@ -80,51 +80,38 @@ server <- function(input, output, session) {
   output$movie_summary <- renderPrint(
     summary(data2)
   )  
-  #Average rating
-  output$averageRating <- renderPlot({
+
+  
+#Heatmap of top users and movies
+  output$average2 <- renderPlot({
     ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
     ratingMatrix <- as.matrix(ratingMatrix[,-1])
-    
     ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
     movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
-    #movie_rating
-    
     minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
     minimum_users <- quantile(colCounts(movie_rating), 0.98)
-    
-    #average_rating <- rowMeans(movie_rating)
-    #qplot(average_rating, fill=I('steelblue'), col=I("red"))+
-     # ggtitle("distribution of the average rating per user")
-  normalized_rating <- normalize(movie_rating)
-  sum(rowMeans(normalized_rating) > 0.00001)
-  
-  image(normalized_rating[rowCounts(normalized_rating) > minimum_movies,
-                          colCounts(normalized_rating) > minimum_users],
-        main = "Normalized rating of top Users")
-
+    normalized_rating <- normalize(movie_rating)
+    sum(rowMeans(normalized_rating) > 0.00001)
+    image(ratingMatrix[1:30,1:30], axes = FALSE, main = "30 X 30 heatmap")
   })
-
+  
+#plots the average rating per user
   output$histogram <- renderPlot({
     ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
     ratingMatrix <- as.matrix(ratingMatrix[,-1])
     ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
     movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
-    
     minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
     minimum_users <- quantile(colCounts(movie_rating), 0.98)
-     
     normalized_rating <- normalize(movie_rating)
     sum(rowMeans(normalized_rating) > 0.00001)
     average_rating <- rowMeans(movie_rating)
     qplot(average_rating, fill=I('steelblue'), col=I("red"))+
      ggtitle("distribution of the average rating per user")
-    
-    #image(normalized_rating[rowCounts(normalized_rating) > minimum_movies,
-     #                       colCounts(normalized_rating) > minimum_users],
-     #     main = "Normalized rating of top Users")
-    
+
   })
-#most watched movie
+  
+#plots the first 6 most watched movies
   output$most_rated <- renderPlot({
     ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
     ratingMatrix <- as.matrix(ratingMatrix[,-1])
@@ -132,7 +119,6 @@ server <- function(input, output, session) {
     movie_view <- colCounts(ratingMatrix)
     table_view <- data.frame(movie = names(movie_view), views = movie_view)
     table_view <- table_view[order(table_view$views, decreasing = TRUE), ]
-    
     table_view$title <- NA
     for(index in 1:9000){
       table_view[index, 3] <- as.character(subset(data2,
@@ -145,18 +131,16 @@ server <- function(input, output, session) {
       ggtitle("total views of films")
   })
   
+  #plots the normalize heatmap of top users and movies
   output$average <- renderPlot({
     ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
     ratingMatrix <- as.matrix(ratingMatrix[,-1])
     ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
     movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
-    
     minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
     minimum_users <- quantile(colCounts(movie_rating), 0.98)
-    
     normalized_rating <- normalize(movie_rating)
     sum(rowMeans(normalized_rating) > 0.00001)
-  
     image(normalized_rating[rowCounts(normalized_rating) > minimum_movies,
                            colCounts(normalized_rating) > minimum_users],
          main = "Normalized rating of top Users")
