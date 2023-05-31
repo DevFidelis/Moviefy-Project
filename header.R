@@ -7,6 +7,7 @@ library(recommenderlab)
 library(data.table)
 library(ggplot2)
 library(reshape2)
+library(shinydashboard)
 
 # Meta Data
 pageTitles <- titlePanel(title = "", windowTitle = "Moviefy - The home of movies analysis")
