@@ -17,6 +17,18 @@ html, body {
     height: 100%;
 }
 
+body::after {
+  text-align: center;
+  display: block;
+  font-weight: 510;
+  width: 100%;
+  content: "© 2023 Moviefy school project by Group 9 (R). All rights reserved.";
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+  padding: 20px;
+  margin-top: 10px;
+}
+
 header {
     position: fixed;
     top: 0;
@@ -96,4 +108,36 @@ a:active {
 /* classes */
 .push-down {
   margin-top: 80px;
+}
+
+.movie-item {
+  background-color: #ffffffd0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  list-style-type: none;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.pagination li {
+  display: inline-block;
+  margin: 0 5px;
+}
+
+.pagination li a {
+  padding: 5px 10px;
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.pagination li.active a {
+  background-color: dodgerblue;
+  color: #fff;
 }
