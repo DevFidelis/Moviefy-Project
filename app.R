@@ -68,130 +68,89 @@ server <- function(input, output, session) {
   # query2 <- sprintf("SELECT * FROM movies")
   # query1 <- sprintf("SELECT * FROM ratings")
 
-  # data2 <- dbGetQuery(con, query2)
-  # data1 <-    dbGetQuery(con, query1)    
-
-  # # stats
-  # output$data_preview <- renderTable({
-  #   head(data1)
-  # })
-
-  # output$data_preview2 <- renderTable({
-  #   head(data2)
-  # })
-
-  # output$summary_stats <- renderPrint({
-  #   summary(data1)
-  # })
-
-  # output$histogram <- renderPlot({
-  #   ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
-  #   ratingMatrix <- as.matrix(ratingMatrix[,-1])
-  #   ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
-  #   similarity_matrix <- similarity(ratingMatrix[1:4, ], method = "cosine", which= "user")
-  #   image(as.matrix(similarity_matrix), main = "Users Similarity") 
-  # })
-
-  # output$most_rated <- renderPlot({
-  #   ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
-  #   ratingMatrix <- as.matrix(ratingMatrix[,-1])
-  #   ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
-  #   movie_view <- colCounts(ratingMatrix)
-  #   table_view <- data.frame(movie = names(movie_view), views = movie_view)
-  #   table_view <- table_view[order(table_view$views, decreasing = TRUE), ]
-    
-  #   table_view$title <- NA
-  #   #iterating throught the dataset to get movie titles
-  #   for(index in 1:9000){
-  #     table_view[index, 3] <- as.character(subset(data2,
-  #                                                 data2$movieId == table_view[index, 1])$title)
-  #   }
-    
-  #   #showing it in form of a histogram
-  #   #table_view[1:6,]
-  #   ggplot(table_view[1:6,], aes(x = title, y = views)) +
-  #     geom_bar(stat = "identity", fill = 'steelblue') +
-  #     geom_text(aes(label=views), vjust=-0.3, size=3.5) +
-  #     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  #     ggtitle("total views of films")
-  # })
-
-  # output$movie_summary <- renderPrint(
-  #   summary(data2)
-  # )
+  data2 <- dbGetQuery(con, query2)
+  data1 <-    dbGetQuery(con, query1)    
   
-  # Fetch tags from the tags table
-  fetchTags <- function() {
-    query <- "SELECT DISTINCT tag FROM tags"
-    tags <- dbGetQuery(con, query)
-    return(tags$tag)
-  }
+  # Summary of the ratings
+  output$summary_stats <- renderPrint({
+    summary(data1)
+  })
+  # Summary of the ratings
+  output$movie_summary <- renderPrint(
+    summary(data2)
+  )  
+
   
-  # Update selectize input with fetched tags
-  observe({
-    tags <- fetchTags()
-    updateSelectizeInput(session, "tagInput", choices = tags, server = TRUE)
+#Heatmap of top users and movies
+  output$average2 <- renderPlot({
+    ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
+    ratingMatrix <- as.matrix(ratingMatrix[,-1])
+    ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
+    movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
+    minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
+    minimum_users <- quantile(colCounts(movie_rating), 0.98)
+    normalized_rating <- normalize(movie_rating)
+    sum(rowMeans(normalized_rating) > 0.00001)
+    image(ratingMatrix[1:30,1:30], axes = FALSE, main = "30 X 30 heatmap")
   })
   
-  # Fetch movies based on selected tag
-  fetchMovies <- function(tag) {
-    query <- paste0("SELECT m.title, m.genres
-                    FROM movies m
-                    INNER JOIN tags t ON m.movieId = t.movieId
-                    WHERE t.tag = '", tag, "'")
-    result <- dbGetQuery(con, query)
-    return(result)
-  }
-  
-  # Pagination
-  currentPage <- reactiveVal(1)
-  perPage <- 10
-  
-  # Define the action when the fetch button is clicked
-  observeEvent(input$fetchBtn, {
-    tag <- input$tagInput
-    movies <- fetchMovies(tag)
-    totalPages <- ceiling(nrow(movies) / perPage)
-    currentPage(1)
-    output$moviesList <- renderUI({
-      start <- (currentPage() - 1) * perPage + 1
-      end <- min(start + perPage - 1, nrow(movies))
-      if (nrow(movies) > 0) {
-        lapply(start:end, function(i) {
-          tags$div(
-            class = "movie-item",
-            tags$span(paste(movies[i, "title"], " (", movies[i, "genres"], ")"))
-          )
-        })
-      } else {
-        tags$p("No movies found for the selected tag.")
-      }
-    })
-    
-    output$pagination <- renderUI({
-      if (totalPages > 1) {
-        pagination_links <- lapply(1:totalPages, function(page) {
-          tags$li(
-            class = if (page == currentPage()) "active" else NULL,
-            tags$a(
-              href = "#",
-              onclick = paste0("Shiny.setInputValue('currentPage', ", page, ")"),
-              page
-            )
-          )
-        })
-        tags$ul(
-          class = "pagination",
-          pagination_links
-        )
-      }
-    })
+#plots the average rating per user
+  output$histogram <- renderPlot({
+    ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
+    ratingMatrix <- as.matrix(ratingMatrix[,-1])
+    ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
+    movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
+    minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
+    minimum_users <- quantile(colCounts(movie_rating), 0.98)
+    normalized_rating <- normalize(movie_rating)
+    sum(rowMeans(normalized_rating) > 0.00001)
+    average_rating <- rowMeans(movie_rating)
+    qplot(average_rating, fill=I('steelblue'), col=I("red"))+
+     ggtitle("distribution of the average rating per user")
+
   })
+  
+#plots the first 6 most watched movies
+  output$most_rated <- renderPlot({
+    ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
+    ratingMatrix <- as.matrix(ratingMatrix[,-1])
+    ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
+    movie_view <- colCounts(ratingMatrix)
+    table_view <- data.frame(movie = names(movie_view), views = movie_view)
+    table_view <- table_view[order(table_view$views, decreasing = TRUE), ]
+    table_view$title <- NA
+    for(index in 1:9000){
+      table_view[index, 3] <- as.character(subset(data2,
+                                                  data2$movieId == table_view[index, 1])$title)
+    }
+    ggplot(table_view[1:6,], aes(x = title, y = views)) +
+      geom_bar(stat = "identity", fill = 'steelblue') +
+      geom_text(aes(label=views), vjust=-0.3, size=3.5) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      ggtitle("total views of films")
   
   # Update current page when pagination link is clicked
   observeEvent(input$currentPage, {
     currentPage(input$currentPage)
   })
+  
+  #plots the normalize heatmap of top users and movies
+  output$average <- renderPlot({
+    ratingMatrix <- dcast(data1, userId~movieId, value.var = "rating", na.rm=FALSE)
+    ratingMatrix <- as.matrix(ratingMatrix[,-1])
+    ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
+    movie_rating <- ratingMatrix[rowCounts(ratingMatrix) > 50, colCounts(ratingMatrix) >50]
+    minimum_movies <- quantile(rowCounts(movie_rating), 0.98)
+    minimum_users <- quantile(colCounts(movie_rating), 0.98)
+    normalized_rating <- normalize(movie_rating)
+    sum(rowMeans(normalized_rating) > 0.00001)
+    image(normalized_rating[rowCounts(normalized_rating) > minimum_movies,
+                           colCounts(normalized_rating) > minimum_users],
+         main = "Normalized rating of top Users")
+    
+  })
+
+
 
   # Clean up: Disconnect from the database when the app is closed
   onStop(function() {
