@@ -1,44 +1,52 @@
 statsPageUi <- tags$div(
-  dashboardSidebar("Stats"),
-  dashboardBody(
+    class = "push-down",
+    style = "width:100%;",
     fluidRow(
-      box(
-        title = "Rating Statistics",
-        verbatimTextOutput("summary_stats")
-      ),
-      fluidRow(
-        box(
-          title = "Movie Statistics",
-          verbatimTextOutput("movie_summary")
-        )
-      ),
-      fluidRow(
-        box(
-          title = "Normalized Heatmap",
-          plotOutput("average")
-        )
-      ),
-      fluidRow(
+      column(
+        width = 12,
         box(
           title = "Heatmap",
           plotOutput("average2")
         )
       ),
-      fluidRow(
+      column(
+        width = 12,
         box(
-          title = "Most Viewed",
-          plotOutput("most_rated")
+          title = "Normalized Heatmap",
+          plotOutput("average")
         )
-      ),
-    
-      fluidRow(
+      )
+    ),
+    fluidRow(
+      column(
+        width = 12,
         box(
           title = "Avarage Rating",
           plotOutput("histogram")
         )
+      ),
+      column(
+        width = 12,
+        box(
+          title = "Most Viewed",
+          plotOutput("most_rated")
+        )
       )
-    
+    ),
+    fluidRow(
+      column(
+        width = 12,
+        box(
+          title = "Rating Statistics",
+          verbatimTextOutput("summary_stats")
+        )
+      ),
+      column(
+        width = 12,
+        box(
+          title = "Movie Statistics",
+          verbatimTextOutput("movie_summary")
+        )
+      )
     )
-  )
 )
-
