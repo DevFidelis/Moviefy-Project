@@ -19,11 +19,11 @@ server <- function(input, output, session) {
   
   # connect to remote database
   con <- dbConnect(RMySQL::MySQL(), 
-                   dbname = "bvytebcmiythrl1d1icu",
-                   host = "bvytebcmiythrl1d1icu-mysql.services.clever-cloud.com",
+                   dbname = "moviedb",
+                   host = "localhost",
                    port = 3306,
-                   user = "u8ulpjyfa8ywgjut",
-                   password = "5dHXIT7aWAJ641MnIWq0")
+                   user = "root",
+                   password = "")
   
   # Retrieve genres from the remote database
   genres <- reactive({
